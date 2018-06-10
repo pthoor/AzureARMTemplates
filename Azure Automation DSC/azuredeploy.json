@@ -1,0 +1,237 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "dcType": {
+        "type": "string",
+        "allowedValues": [
+          "FirstDC",
+          "AdditionalDC"
+        ],
+        "defaultValue": "AdditionalDC",
+        "metadata": {
+          "description": "Is it the first domain controller (new domain/forest) or will you be adding one?"
+        }
+      },
+      "adminUsername": {
+        "type": "string",
+        "metadata": {
+          "description": "User name for the Virtual Machine."
+        }
+      },
+      "adminPassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Password for the Virtual Machine."
+        }
+      },
+      "vmPrefix": {
+        "type": "string",
+        "metadata": {
+          "description": "The prefix that will be used for the vm name"
+        }
+      },
+      "vmSuffix": {
+        "type": "string",
+        "metadata": {
+          "description": "The suffix that will be used for the vm name"
+        }
+      },
+      "existingVirtualNetworkName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the existing VNET"
+        }
+      },
+      "existingVirtualNetworkResourceGroup": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the existing VNET resource group"
+        }
+      },
+      "subnetName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the subnet in the virtual network you want to use"
+        }
+      },
+      "dscRegistrationKey": {
+        "type": "string",
+        "metadata": {
+          "description": "Registration key to use to onboard to the Azure Automation DSC pull/reporting server"
+        }
+      },
+      "dscRegistrationUrl": {
+        "type": "string",
+        "metadata": {
+          "description": "Registration url of the Azure Automation DSC pull/reporting server"
+        }
+      }
+    },
+    "variables": {
+      "vmName": "addc",
+      "vmFullName": "[concat(parameters('vmPrefix'),variables('vmName'),parameters('vmSuffix'))]",
+      "vmSize": "Standard_B2s",
+      "imagePublisher": "MicrosoftWindowsServer",
+      "imageOffer": "WindowsServer",
+      "windowsOSVersion": "2016-Datacenter",
+      "OSDiskName": "[concat('disk-',variables('vmFullName'),'-os')]",
+      "dataDisk1VhdName": "[concat('disk-',variables('vmFullName'),'-data01')]",
+      "storageAccountType": "Standard_LRS",
+      "nicName": "[concat('nic-',variables('vmFullName'))]",
+      "vnetName": "[parameters('existingVirtualNetworkName')]",
+      "vnetRG": "[parameters('existingVirtualNetworkResourceGroup')]",
+      "vnetSubnet": "[parameters('subnetName')]",
+      "vnetID": "[resourceId(variables('vnetRG'), 'Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+      "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('vnetSubnet'))]",
+      "apiVersion": "2015-06-15",
+      "apiVersionManagedDisks": "2016-04-30-preview",
+      "dscLinkedTemplateUri":  "https://raw.githubusercontent.com/pthoor/TestAzure/master/Register%20in%20Azure%20Automation%20DSC/Register%20VM/azuredeploy.json",
+      "dscRegistrationKey": "[parameters('dscRegistrationKey')]",
+      "dscRegistrationUrl": "[parameters('dscRegistrationUrl')]",
+      "dscNodeConfigurationName": "[concat('ADDSExistingDomain.','localhost')]",
+      "updateip_templateUri": "https://raw.githubusercontent.com/kvaes/TasmanianTraders-IaC-ActiveDirectory/master/update-nic.json"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Compute/disks",
+        "name": "[variables('dataDisk1VhdName')]",
+        "apiVersion": "[variables('apiVersionManagedDisks')]",
+        "location": "[resourceGroup().location]",
+        "properties":
+        {
+          "creationData":
+          {
+            "createOption" : "Empty"
+          }
+        ,
+          "accountType" : "[variables('storageAccountType')]",
+          "diskSizeGB": "32"
+        }
+      },
+      {
+        "apiVersion": "[variables('apiVersion')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[variables('nicName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "[variables('apiVersionManagedDisks')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[variables('vmFullName')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
+          "[concat('Microsoft.Compute/disks/', variables('dataDisk1VhdName'))]"
+        ],
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[variables('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[variables('vmFullName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('imagePublisher')]",
+              "offer": "[variables('imageOffer')]",
+              "sku": "[variables('windowsOSVersion')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "[variables('OSDiskName')]",
+              "createOption": "FromImage"
+            },
+            "dataDisks": [
+              {
+                "lun": 2,
+                "name": "[variables('dataDisk1VhdName')]",
+                "createOption": "attach",
+                "managedDisk":
+                {
+                  "id": "[resourceId('Microsoft.Compute/disks', variables('dataDisk1VhdName'))]"
+                }
+              }
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+              }
+            ]
+          }
+        }
+      },
+      { 
+        "apiVersion": "2015-01-01", 
+        "name": "linkedTemplateDscPullServer", 
+        "type": "Microsoft.Resources/deployments", 
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', variables('vmFullName'))]"
+        ],
+        "properties": { 
+          "mode": "incremental", 
+          "templateLink": {
+            "uri": "[variables('dscLinkedTemplateUri')]",
+            "contentVersion": "1.0.0.0"
+          }, 
+          "parameters": { 
+            "vmName":{
+              "value": "[variables('vmFullName')]"
+            },
+            "registrationKey":{
+              "value": "[variables('dscRegistrationKey')]"
+            },
+            "registrationUrl":{
+              "value": "[variables('dscRegistrationUrl')]"
+            },
+            "nodeConfigurationName":{
+              "value": "[variables('dscNodeConfigurationName')]"
+            } 
+          } 
+        } 
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "name": "linkedTemplateUpdateIp",
+        "apiVersion": "2015-01-01",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "[variables('updateip_templateUri')]",
+            "contentVersion": "1.0.0.0"
+          },
+          "parameters": {
+            "nicName": {
+              "value": "[variables('nicName')]"
+            },
+            "SubnetRef": {
+              "value": "[variables('SubnetRef')]"
+            },
+            "privateIp": {
+              "value": "[reference(concat('Microsoft.Network/networkInterfaces/', variables('nicName'))).ipConfigurations[0].properties.privateIPAddress]"
+            }
+          }
+        }
+      }
+    ]
+  }

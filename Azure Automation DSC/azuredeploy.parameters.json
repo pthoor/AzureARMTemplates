@@ -1,0 +1,36 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "dcType": {
+        "value": "AdditionalDC"
+      },
+      "adminUsername": {
+        "value": "azuretest"
+      },
+      "adminPassword": {
+        "value": "MyNotSoSecretPassword?666"
+      },
+      "vmPrefix": {
+        "value": "Azure-"
+      },
+      "vmSuffix": {
+        "value": "01"
+      },
+      "existingVirtualNetworkName": {
+        "value": "vNet01"
+      },
+      "existingVirtualNetworkResourceGroup": {
+        "value": "vNets"
+      },
+      "subnetName": {
+        "value": "Server-Subnet"
+      },
+      "dscRegistrationKey": {
+        "value": "sH5Xtk/D03vyrz+pH+OFp8bIm5tnXK9ps73wMF+y3IRYz9Pbq9OTU2/8GHEAWSXUj1xP++mIgIeG5mGogoMzSg=="
+      },
+      "dscRegistrationUrl": {
+        "value": "https://we-agentservice-prod-1.azure-automation.net/accounts/ca3c3e9f-2883-49f0-a27e-716179722092"
+      }
+    }
+  }
