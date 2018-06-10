@@ -1,0 +1,30 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "thooradmin"
+        },
+        "adminPassword": {
+            "value": "P@ssw0rd1234"
+        },
+        "virtualNetworkResourceGroup": {
+            "value": "vNets"
+        },
+        "existingVNETName": {
+            "value": "vNet01"
+        },
+        "existingSubnetName": {
+            "value": "Server-Subnet"
+        },
+        "domainToJoin": {
+            "value": "thoorlab.tech"
+        },
+        "domainUsername": {
+            "value": "thooradmindj"
+        },
+        "domainPassword": {
+            "value": "P@ssw0rd1234"
+        }
+    }
+}

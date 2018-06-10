@@ -1,0 +1,234 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "adminUsername": {
+        "type": "string",
+        "metadata": {
+          "description": "Username for the Virtual Machine."
+        }
+      },
+      "adminPassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Password for the Virtual Machine."
+        }
+      },
+      "windowsOSVersion": {
+        "type": "string",
+        "defaultValue": "2016-Datacenter",
+        "allowedValues": [
+          "2008-R2-SP1",
+          "2012-Datacenter",
+          "2012-R2-Datacenter",
+          "2016-Nano-Server",
+          "2016-Datacenter-with-Containers",
+          "2016-Datacenter",
+          "2016-Datacenter-Server-Core"
+        ],
+        "metadata": {
+          "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+        }
+      },
+      "numberOfInstances": {
+        "type": "int",
+        "defaultValue": 2,
+        "minValue": 2,
+        "maxValue": 5,
+        "metadata": {
+          "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      },
+      "virtualNetworkResourceGroup": {
+        "type": "string",
+        "metadata": {
+          "description": "Existing RG that the vNet exists"
+        }
+      },
+      "existingVNETName": {
+        "type": "string",
+        "metadata": {
+          "description": "Existing VNET that contains the domain controller"
+        }
+      },
+      "existingSubnetName": {
+        "type": "string",
+        "metadata": {
+          "description": "Existing subnet that contains the domain controller"
+        }
+      },
+      "domainToJoin": {
+        "type": "string",
+        "metadata": {
+          "description": "The FQDN of the AD domain"
+        }
+      },
+      "domainUsername": {
+        "type": "string",
+        "metadata": {
+          "description": "Username of the account on the domain"
+        }
+      },
+      "domainPassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Password of the account on the domain"
+        }
+      },
+      "oupath": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+        "description": "Specifies an organizational unit (OU) for the domain account. Enter the full distinguished name of the OU in quotation marks. Example: \"OU=testOU; DC=domain; DC=Domain; DC=com\""
+        }
+      },
+      "domainJoinOptions": {
+        "type": "int",
+        "defaultValue": 3,
+        "metadata": {
+          "description": "Set of bit flags that define the join options. Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+        }
+      }
+    },
+    "variables": {
+      "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'o365ha')]",
+      "availabilitySetName": "availabilitySetOffice365HA",
+      "vnetID": "[resourceId(parameters('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNETName'))]",
+      "subnetId": "[concat(variables('vnetID'),'/subnets/', parameters('existingSubnetName'))]"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Compute/availabilitySets",
+        "name": "[variables('availabilitySetName')]",
+        "apiVersion": "2016-04-30-preview",
+        "location": "[parameters('location')]",
+        "properties": {
+          "platformFaultDomainCount": 3,
+          "platformUpdateDomainCount": "5",
+          "managed": true
+        }
+      },    
+      {
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "[variables('storageAccountName')]",
+        "apiVersion": "2017-10-01",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "Standard_LRS"
+        },
+        "kind": "StorageV2",
+        "properties": {}
+      },
+      {
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[concat('AzureVMnic', copyindex())]",
+        "location": "[parameters('location')]",
+        "copy": {
+          "name": "nicLoop",
+          "count": "[parameters('numberOfInstances')]"
+        },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('subnetid')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2017-03-30",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[concat('AzureVM', copyIndex())]",
+        "location": "[parameters('location')]",
+        "copy": {
+          "name": "virtualMachineLoop",
+          "count": "[parameters('numberOfInstances')]"
+        },
+        "dependsOn": [
+          "nicLoop",
+          "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+          "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+        ],
+        "properties": {
+          "availabilitySet": {
+            "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+          },
+          "hardwareProfile": {
+            "vmSize": "Standard_B2s"
+          },
+          "osProfile": {
+            "computerName": "[concat('AzureVM', copyIndex())]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "MicrosoftWindowsServer",
+              "offer": "WindowsServer",
+              "sku": "[parameters('windowsOSVersion')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "createOption": "FromImage"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('AzureVMnic', copyindex()))]"
+              }
+            ]
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": false,
+              "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))).primaryEndpoints.blob]"
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "2015-06-15",
+        "copy": {
+          "name": "DomainJoinCopy",
+            "count": "[parameters('numberOfInstances')]"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "name": "[concat('AzureVM', copyIndex(),'/joindomain')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', concat('AzureVM', copyIndex()))]"
+        ],
+        "properties": {
+          "publisher": "Microsoft.Compute",
+          "type": "JsonADDomainExtension",
+          "typeHandlerVersion": "1.3",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "Name": "[parameters('domainToJoin')]",
+            "OUPath": "[parameters('oupath')]" ,
+            "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
+            "Restart": "true",
+            "Options": "[parameters('domainJoinOptions')]"
+          },
+          "protectedSettings": {
+            "Password": "[parameters('domainPassword')]"
+          }
+        }
+      }
+  ]
+}
