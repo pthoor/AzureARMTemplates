@@ -15,7 +15,7 @@
         "value": "Azure-"
       },
       "vmSuffix": {
-        "value": "01"
+        "value": "02"
       },
       "existingVirtualNetworkName": {
         "value": "vNet01"

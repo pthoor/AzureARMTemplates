@@ -86,7 +86,7 @@
       "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('vnetSubnet'))]",
       "apiVersion": "2015-06-15",
       "apiVersionManagedDisks": "2016-04-30-preview",
-      "dscLinkedTemplateUri":  "https://raw.githubusercontent.com/pthoor/TestAzure/master/Register%20in%20Azure%20Automation%20DSC/Register%20VM/azuredeploy.json",
+      "dscLinkedTemplateUri":  "https://raw.githubusercontent.com/pthoor/AzureARMTemplates/master/Azure%20Automation%20DSC/Register%20VM/azuredeploy.json",
       "dscRegistrationKey": "[parameters('dscRegistrationKey')]",
       "dscRegistrationUrl": "[parameters('dscRegistrationUrl')]",
       "dscNodeConfigurationName": "[concat('ADDSExistingDomain.','localhost')]",
