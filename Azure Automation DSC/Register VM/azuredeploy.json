@@ -17,7 +17,7 @@
         },
         "configurationFunction": {
             "type": "string",
-            "defaultValue": "ADDSExistingDomain.ps1\\ADDSExistingDomain",
+            "defaultValue": "UpdateLCMforAAPull.ps1\\UpdateLCMforAAPull",
             "metadata": {
                 "description": "DSC configuration function to call. Should contain filename and function in format fileName.ps1\\configurationfunction"
             }
