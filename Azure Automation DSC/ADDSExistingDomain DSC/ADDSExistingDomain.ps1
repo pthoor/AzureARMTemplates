@@ -51,10 +51,9 @@
             DomainName = $dscDomainName 
             DomainAdministratorCredential = $dscDomainAdmin 
             SafemodeAdministratorPassword = $SafeModePassword 
-            DatabasePath = "C:\NTDS" 
-            LogPath = "C:\NTDS" 
-            SysvolPath = "C:\SYSVOL" 
-            SiteName = "AzureSite"
+            DatabasePath = "C:\NTDS"
+            LogPath = "C:\NTDS"
+            SysvolPath = "C:\SYSVOL"
             DependsOn = "[xWaitForADDomain]DScForestWait"
         } 
         xPendingReboot Reboot1 

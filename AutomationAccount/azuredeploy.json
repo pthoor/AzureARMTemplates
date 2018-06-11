@@ -1,0 +1,143 @@
+{
+    "$schema": "http://schemas.microsoft.org/azure/deploymentTemplate?api-version=2015-01-01#",
+    "contentVersion": "1.0",
+    "parameters": {
+        "adAdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The username for the Azure Automation credential."
+            }
+        },
+        "adAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Azure Automation credential."
+            }
+        },
+        "adDomainName": {
+            "type": "string",
+            "metadata": {
+                "description": "The domain name used for the AD domain user."
+            }
+        },
+        "adDomainNetbiosName": {
+            "type": "string",
+            "metadata": {
+                "description": "The netbios name used for the AD domain."
+            }
+        },
+        "modules_xPendingReboot_name": {
+            "defaultValue": "xPendingReboot",
+            "type": "string"
+        },
+        "modules_xActiveDirectory_name": {
+            "defaultValue": "xActiveDirectory",
+            "type": "string"
+        }
+    },
+    "variables": {
+        "sku": "Free",
+        "accountName": "TestAutomation",
+        "adAdminCedentialName": "addcDomainAdmin",
+        "adAdminUsername": "[parameters('adAdminUsername')]",
+        "adAdminPassword": "[parameters('adAdminPassword')]",
+        "adDomainVariableName":"addcDomainName",
+        "adDomainName":"[parameters('adDomainName')]",
+        "adDomainDescription":"The domain name",
+        "adDomainNetbiosVariableName":"addcDomainNetbiosName",
+        "adDomainNetbiosName":"[parameters('adDomainNetbiosName')]",
+        "adDomainNetbiosDescription":"The netbios name for the domain"
+    },
+    "resources": [
+      {
+        "name": "[variables('accountName')]",
+        "type": "Microsoft.Automation/automationAccounts",
+        "apiVersion": "2015-10-31",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [ ],
+        "tags": { },
+        "properties": {
+          "sku": {
+            "name": "[variables('sku')]"
+          }
+        },
+        "resources": [
+          {
+            "name": "[variables('adAdminCedentialName')]",
+            "type": "credentials",
+            "apiVersion": "2015-10-31",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Automation/automationAccounts/', variables('accountName'))]"
+            ],
+            "tags": { },
+            "properties": {
+              "userName": "[variables('adAdminUsername')]",
+              "password": "[variables('adAdminPassword')]"
+            }
+          },
+          {
+            "name": "[variables('adDomainVariableName')]",
+            "type": "variables",
+            "apiVersion": "2015-10-31",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Automation/automationAccounts/', variables('accountName'))]"
+            ],
+            "tags": { },
+            "properties": {
+              "isEncrypted": false,
+              "type": "String",
+              "value": "[concat('\"',variables('adDomainName'),'\"')]",
+              "description": "[variables('adDomainDescription')]"
+            }
+          },
+          {
+            "name": "[variables('adDomainNetbiosVariableName')]",
+            "type": "variables",
+            "apiVersion": "2015-10-31",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Automation/automationAccounts/', variables('accountName'))]"
+            ],
+            "tags": { },
+            "properties": {
+              "isEncrypted": false,
+              "type": "String",
+              "value": "[concat('\"',variables('adDomainNetbiosName'),'\"')]",
+              "description": "[variables('adDomainNetbiosDescription')]"
+            }
+          },
+          {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "name": "[concat(variables('accountName'), '/', parameters('modules_xPendingReboot_name'))]",
+            "apiVersion": "2015-10-31",
+            "scale": null,
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/xpendingreboot.0.4.0.nupkg"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
+            ]
+           },
+           {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "name": "[concat(variables('accountName'), '/', parameters('modules_xActiveDirectory_name'))]",
+            "apiVersion": "2015-10-31",
+            "scale": null,
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/xactivedirectory.2.18.0.nupkg"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
+            ]      
+           }
+        ]
+      }
+    ],
+    "outputs": {}
+}
