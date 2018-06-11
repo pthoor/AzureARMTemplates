@@ -35,7 +35,7 @@
         xADReplicationSubnet AzureSubnet 
         { 
             Ensure = "Present" 
-            Name = "10.0.1.0/16" 
+            Name = "10.0.1.0/24" 
             Site = "AzureSite"
             DependsOn = "[xADReplicationSite]AzureSite"
         } 
