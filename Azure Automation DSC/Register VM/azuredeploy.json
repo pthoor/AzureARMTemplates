@@ -87,7 +87,7 @@
         },
         "allowModuleOverwrite": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": true,
             "metadata": {
                 "description": "DSC agent (LCM) allowModuleOverwrite setting"
             }
