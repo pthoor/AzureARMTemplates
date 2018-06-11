@@ -24,7 +24,7 @@
         "value": "vNets"
       },
       "subnetName": {
-        "value": "Server-Subnet"
+        "value": "Office365HA"
       },
       "dscRegistrationKey": {
         "value": "sH5Xtk/D03vyrz+pH+OFp8bIm5tnXK9ps73wMF+y3IRYz9Pbq9OTU2/8GHEAWSXUj1xP++mIgIeG5mGogoMzSg=="

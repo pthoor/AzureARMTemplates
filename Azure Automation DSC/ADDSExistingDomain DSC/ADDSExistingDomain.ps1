@@ -10,8 +10,8 @@
     $SafeModePassword = $dscDomainAdmin 
     $dscDomainJoinAdminUsername = $dscDomainAdmin.UserName 
     $dscDomainJoinAdmin = new-object -typename System.Management.Automation.PSCredential -argumentlist "$dscDomainName\$dscDomainJoinAdminUsername", $dscDomainAdmin.Password 
-    $RetryCount = 10 
-    $RetryIntervalSec = 15 
+    $RetryCount = 20 
+    $RetryIntervalSec = 45 
     
     node "localhost" { 
         WindowsFeature RSAT 
@@ -27,7 +27,7 @@
         xWaitForADDomain DscForestWait 
         { 
             DomainName = $dscDomainName 
-            DomainUserCredential= $dscDomainJoinAdmin 
+            DomainUserCredential= $dscDomainAdmin 
             RetryCount = $RetryCount 
             RetryIntervalSec = $RetryIntervalSec 
             DependsOn = "[WindowsFeature]ADDS" 
