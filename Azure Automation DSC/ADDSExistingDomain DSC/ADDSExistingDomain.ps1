@@ -52,7 +52,8 @@
             DatabasePath = "C:\NTDS" 
             LogPath = "C:\NTDS" 
             SysvolPath = "C:\SYSVOL" 
-            DependsOn = "[xWaitForADDomain]DScForestWait" 
+            SiteName = "AzureSite"
+            DependsOn = "[xWaitForADDomain]DScForestWait","[xADReplicationSite]AzureSite"
         } 
         xPendingReboot Reboot1 
         { 
