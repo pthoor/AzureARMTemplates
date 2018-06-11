@@ -10,7 +10,7 @@
         },
         "modulesUrl": {
             "type": "string",
-            "defaultValue": "https://github.com/pthoor/AzureARMTemplates/raw/master/Azure%20Automation%20DSC/ADDSExistingDomain%20DSC/ADDSExistingDomain.zip",
+            "defaultValue": "https://github.com/pthoor/AzureARMTemplates/raw/master/Azure%20Automation%20DSC/ADDSExistingDomain%20DSC/UpdateLCMforAAPull.zip",
             "metadata": {
                 "description": "URL for the DSC configuration package. NOTE: Can be a Github url(raw) to the zip file (this is the default value)"
             }
