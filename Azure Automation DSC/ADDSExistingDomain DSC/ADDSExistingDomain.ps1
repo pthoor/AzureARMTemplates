@@ -36,13 +36,14 @@
         { 
             Ensure = "Present" 
             Name = "10.0.1.0/16" 
-            Site = "AzureSite" 
+            Site = "AzureSite"
+            DependsOn = "[xADReplicationSite]AzureSite"
         } 
         xADReplicationSite AzureSite 
         { 
             Ensure = "Present" 
             Name = "AzureSite" 
-            DependsOn = "[xADReplicationSubnet]AzureSubnet" 
+             
         } 
         xADDomainController ReplicaDC 
         { 
