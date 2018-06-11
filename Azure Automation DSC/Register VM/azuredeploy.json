@@ -112,7 +112,7 @@
         "properties": {
             "publisher": "Microsoft.Powershell",
             "type": "DSC",
-            "typeHandlerVersion": "2.14",
+            "typeHandlerVersion": "2.73",
             "autoUpgradeMinorVersion": true,
             "protectedSettings": {
                 "Items": {
@@ -120,9 +120,9 @@
                 }
             },
             "settings": {
-                "ModulesUrl": "[parameters('modulesUrl')]",
+                "ModulesUrl": "",
                 "SasToken": "",
-                "ConfigurationFunction": "[parameters('configurationFunction')]",
+                "ConfigurationFunction": "",
                 "Properties": [
                     {
                         "Name": "RegistrationKey",
