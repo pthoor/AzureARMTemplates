@@ -186,7 +186,7 @@
           "[concat('Microsoft.Compute/virtualMachines/', variables('vmFullName'))]"
         ],
         "properties": { 
-          "mode": "incremental", 
+          "mode": "Incremental", 
           "templateLink": {
             "uri": "[variables('dscLinkedTemplateUri')]",
             "contentVersion": "1.0.0.0"
