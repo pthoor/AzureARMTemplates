@@ -42,7 +42,8 @@
         xADReplicationSite AzureSite 
         { 
             Ensure = "Present" 
-            Name = "AzureSite" 
+            Name = "AzureSite"
+            DependsOn = "[xADDomainController]ReplicaDC"
              
         } 
         xADDomainController ReplicaDC 
@@ -54,7 +55,7 @@
             LogPath = "C:\NTDS" 
             SysvolPath = "C:\SYSVOL" 
             SiteName = "AzureSite"
-            DependsOn = "[xWaitForADDomain]DScForestWait","[xADReplicationSite]AzureSite"
+            DependsOn = "[xWaitForADDomain]DScForestWait"
         } 
         xPendingReboot Reboot1 
         { 
