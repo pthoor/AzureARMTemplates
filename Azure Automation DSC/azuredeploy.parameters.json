@@ -11,19 +11,13 @@
       "adminPassword": {
         "value": "MyNotSoSecretPassword?666"
       },
-      "vmPrefix": {
-        "value": "Azure-"
-      },
-      "vmSuffix": {
-        "value": "DC5"
-      },
       "existingVirtualNetworkName": {
         "value": "vNet01"
       },
       "existingVirtualNetworkResourceGroup": {
         "value": "vNets"
       },
-      "subnetName": {
+      "existingSubnetName": {
         "value": "Office365HA"
       },
       "dscRegistrationKey": {

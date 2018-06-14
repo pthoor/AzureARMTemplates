@@ -38,10 +38,10 @@
     "variables": {
         "sku": "Free",
         "accountName": "TestAutomation",
-        "adAdminCedentialName": "addcDomainAdmin",
+        "adAdminCedentialName": "DomainAdmin",
         "adAdminUsername": "[parameters('adAdminUsername')]",
         "adAdminPassword": "[parameters('adAdminPassword')]",
-        "adDomainVariableName":"addcDomainName",
+        "adDomainVariableName":"DomainName",
         "adDomainName":"[parameters('adDomainName')]",
         "adDomainDescription":"The domain name",
         "adDomainNetbiosVariableName":"addcDomainNetbiosName",
