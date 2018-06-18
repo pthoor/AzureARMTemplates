@@ -2,17 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-      "dcType": {
-        "type": "string",
-        "allowedValues": [
-          "FirstDC",
-          "AdditionalDC"
-        ],
-        "defaultValue": "AdditionalDC",
-        "metadata": {
-          "description": "Is it the first domain controller (new domain/forest) or will you be adding one?"
-        }
-      },
       "adminUsername": {
         "type": "string",
         "metadata": {
@@ -93,7 +82,7 @@
       "dscRegistrationKey": "[parameters('dscRegistrationKey')]",
       "dscRegistrationUrl": "[parameters('dscRegistrationUrl')]",
       "dscNodeConfigurationName": "[concat('ADDSExistingDomain.','localhost')]",
-      "updateip_templateUri": "https://raw.githubusercontent.com/kvaes/TasmanianTraders-IaC-ActiveDirectory/master/update-nic.json"
+      "updateip_templateUri": "https://raw.githubusercontent.com/pthoor/AzureARMTemplates/master/Azure%20Automation%20DSC/update-nic.json"
     },
     "functions": [{
       "namespace": "myFunctions",
