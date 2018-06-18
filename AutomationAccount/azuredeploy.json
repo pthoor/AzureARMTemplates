@@ -2,6 +2,12 @@
     "$schema": "http://schemas.microsoft.org/azure/deploymentTemplate?api-version=2015-01-01#",
     "contentVersion": "1.0",
     "parameters": {
+        "accountName": {
+            "type": "string",
+            "metadata" : {
+                "description": "Name of the Azure Automation Account"
+            }
+        },
         "adAdminUsername": {
             "type": "string",
             "metadata": {
@@ -37,7 +43,7 @@
     },
     "variables": {
         "sku": "Free",
-        "accountName": "TestAutomation",
+        "accountName": "[parameters('accountName')]",
         "adAdminCedentialName": "DomainAdmin",
         "adAdminUsername": "[parameters('adAdminUsername')]",
         "adAdminPassword": "[parameters('adAdminPassword')]",
