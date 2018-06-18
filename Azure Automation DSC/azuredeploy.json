@@ -34,6 +34,9 @@
           "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
         }
       },
+      "virtualMachineName": {
+        "type": "string"
+      },
       "location": {
         "type": "string",
         "defaultValue": "[resourceGroup().location]",
@@ -84,14 +87,64 @@
       "vnetSubnet": "[parameters('existingSubnetName')]",
       "vnetID": "[resourceId(variables('vnetRG'), 'Microsoft.Network/virtualNetworks', variables('vnetName'))]",
       "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('vnetSubnet'))]",
-      "apiVersion": "2015-06-15",
-      "apiVersionManagedDisks": "2016-04-30-preview",
+      "apiVersionVM": "2017-12-01",
+      "apiVersionNic": "2018-04-01",
       "dscLinkedTemplateUri":  "https://raw.githubusercontent.com/pthoor/AzureARMTemplates/master/Azure%20Automation%20DSC/Register%20VM/azuredeploy.json",
       "dscRegistrationKey": "[parameters('dscRegistrationKey')]",
       "dscRegistrationUrl": "[parameters('dscRegistrationUrl')]",
       "dscNodeConfigurationName": "[concat('ADDSExistingDomain.','localhost')]",
       "updateip_templateUri": "https://raw.githubusercontent.com/kvaes/TasmanianTraders-IaC-ActiveDirectory/master/update-nic.json"
     },
+    "functions": [{
+      "namespace": "myFunctions",
+      "members": {
+          "vmName": {
+              "parameters": [{
+                      "name": "inputNameVM",
+                      "type": "string"
+                  },
+                  {
+                      "name": "indexvm",
+                      "type": "int"
+                  }
+              ],
+              "output": {
+                  "type": "string",
+                  "value": "[concat(toLower(parameters('inputNameVM')), padLeft(parameters('indexvm'),2,'0'))]"
+              }
+          },
+          "diskName": {
+              "parameters": [{
+                      "name": "inputNameDisk",
+                      "type": "string"
+                  },
+                  {
+                      "name": "indexdisk",
+                      "type": "int"
+                  }
+              ],
+              "output": {
+                  "type": "string",
+                  "value": "[concat(toLower(parameters('inputNameDisk')), padLeft(parameters('indexdisk'),2,'0'), '-osdisk')]"
+              }
+          },
+          "nicName": {
+              "parameters": [{
+                      "name": "inputNameNic",
+                      "type": "string"
+                  },
+                  {
+                      "name": "indexnic",
+                      "type": "int"
+                  }
+              ],
+              "output": {
+                  "type": "string",
+                  "value": "[concat(toLower(parameters('inputNameNic')), padLeft(parameters('indexnic'),2,'0'), '-nic')]"
+              }
+          }
+      }
+  }],
     "resources": [
       {
         "type": "Microsoft.Compute/availabilitySets",
@@ -105,29 +158,9 @@
         }
       },
       {
-        "type": "Microsoft.Compute/disks",
-        "name": "[concat('AzureDataDisk', copyindex())]",
-        "apiVersion": "[variables('apiVersionManagedDisks')]",
-        "location": "[resourceGroup().location]",
-        "copy": {
-          "name": "diskLoop",
-          "count": "[parameters('numberOfInstances')]"
-        },
-        "properties":
-        {
-          "creationData":
-          {
-            "createOption" : "Empty"
-          }
-        ,
-          "accountType" : "[variables('storageAccountType')]",
-          "diskSizeGB": "32"
-        }
-      },
-      {
-        "apiVersion": "[variables('apiVersion')]",
+        "apiVersion": "[variables('apiVersionNic')]",
         "type": "Microsoft.Network/networkInterfaces",
-        "name": "[concat('AzureDCnic', copyindex())]",
+        "name": "[myFunctions.nicName(parameters('virtualMachineName'),copyindex(1))]",
         "location": "[resourceGroup().location]",
         "copy": {
           "name": "nicLoop",
@@ -148,9 +181,9 @@
         }
       },
       {
-        "apiVersion": "[variables('apiVersionManagedDisks')]",
+        "apiVersion": "[variables('apiVersionVM')]",
         "type": "Microsoft.Compute/virtualMachines",
-        "name": "[concat('AzureDC', copyIndex())]",
+        "name": "[myFunctions.vmName(parameters('virtualMachineName'),copyindex(1))]",
         "location": "[resourceGroup().location]",
         "copy": {
           "name": "virtualMachineLoop",
@@ -167,9 +200,13 @@
             "vmSize": "[variables('vmSize')]"
           },
           "osProfile": {
-            "computerName": "[concat('AzureDC', copyIndex())]",
+            "computerName": "[myFunctions.vmName(parameters('virtualMachineName'),copyindex(1))]",
             "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]"
+            "adminPassword": "[parameters('adminPassword')]",
+            "windowsConfiguration": {
+              "provisionVMAgent": true,
+              "enableAutomaticUpdates": true
+            }
           },
           "storageProfile": {
             "imageReference": {
@@ -179,13 +216,18 @@
               "version": "latest"
             },
             "osDisk": {
-              "createOption": "FromImage"
-            }
+              "name": "[myFunctions.diskName(parameters('virtualMachineName'),copyindex(1))]",
+              "createOption": "FromImage",
+              "managedDisk": {
+                "storageAccountType": "[variables('storageAccountType')]"
+              }
+            },
+            "dataDisks": []
           },
           "networkProfile": {
             "networkInterfaces": [
               {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('AzureDCnic', copyIndex()))]"
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', myFunctions.nicName(parameters('virtualMachineName'),copyindex(1)))]"
               }
             ]
           }
@@ -196,7 +238,8 @@
         "name": "[concat('linkedTemplateDscPullServer', copyIndex())]", 
         "type": "Microsoft.Resources/deployments",
         "dependsOn": [
-          "virtualMachineLoop"
+          "virtualMachineLoop",
+          "linkedTemplateUpdateIpLoop"
         ],
         "properties": { 
           "mode": "Incremental", 
@@ -206,7 +249,7 @@
           }, 
           "parameters": { 
             "vmName":{
-              "value": "[concat('AzureDC', copyIndex())]"
+              "value": "[myFunctions.vmName(parameters('virtualMachineName'),copyindex(1))]"
             },
             "registrationKey":{
               "value": "[variables('dscRegistrationKey')]"
@@ -239,13 +282,13 @@
           },
           "parameters": {
             "nicName": {
-              "value": "[concat('AzureDCnic', copyindex())]"
+              "value": "[myFunctions.nicName(parameters('virtualMachineName'),copyindex(1))]"
             },
             "SubnetRef": {
               "value": "[variables('SubnetRef')]"
             },
             "privateIp": {
-              "value": "[reference(concat('Microsoft.Network/networkInterfaces/', 'AzureDCnic', copyindex())).ipConfigurations[0].properties.privateIPAddress]"
+              "value": "[reference(concat('Microsoft.Network/networkInterfaces/', myFunctions.nicName(parameters('virtualMachineName'),copyindex(1)))).ipConfigurations[0].properties.privateIPAddress]"
             }
           }
         },

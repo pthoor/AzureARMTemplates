@@ -20,6 +20,9 @@
       "existingSubnetName": {
         "value": "Office365HA"
       },
+      "virtualMachineName": {
+        "value": "AzureDC"
+      },
       "dscRegistrationKey": {
         "value": "sH5Xtk/D03vyrz+pH+OFp8bIm5tnXK9ps73wMF+y3IRYz9Pbq9OTU2/8GHEAWSXUj1xP++mIgIeG5mGogoMzSg=="
       },
