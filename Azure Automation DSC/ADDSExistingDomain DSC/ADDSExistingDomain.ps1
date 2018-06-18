@@ -4,8 +4,7 @@
     Import-DscResource -ModuleName 'xActiveDirectory' 
     Import-DSCResource -ModuleName 'xPendingReboot' 
     
-    $dscDomainName = Get-AutomationVariable -Name 'DomainName' 
-    $InternalDomainControllerIP = Get-AutomationVariable -Name 'DCIPAddress' 
+    $dscDomainName = Get-AutomationVariable -Name 'DomainName'
     $dscDomainAdmin = Get-AutomationPSCredential -Name 'DomainAdmin' 
     $SafeModePassword = $dscDomainAdmin 
     $dscDomainJoinAdminUsername = $dscDomainAdmin.UserName 
