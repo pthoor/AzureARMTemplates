@@ -4,8 +4,8 @@
 Param(
 	[Parameter(Mandatory=$true)]
     [string] $dscConfigFile,
-	[string] $dscAutomationAccount = "TestAutomation",
-	[string] $dscResourceGroup = "test-rg",
+	[string] $dscAutomationAccount,
+	[string] $dscResourceGroup,
 	[bool] $Force = $false
 )
 
