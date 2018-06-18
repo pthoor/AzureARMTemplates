@@ -8,20 +8,6 @@
                 "description": "Name of the existing VM to apply the DSC configuration to"
             }
         },
-        "modulesUrl": {
-            "type": "string",
-            "defaultValue": "https://github.com/pthoor/AzureARMTemplates/raw/master/Azure%20Automation%20DSC/ADDSExistingDomain%20DSC/UpdateLCMforAAPull.zip",
-            "metadata": {
-                "description": "URL for the DSC configuration package. NOTE: Can be a Github url(raw) to the zip file (this is the default value)"
-            }
-        },
-        "configurationFunction": {
-            "type": "string",
-            "defaultValue": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
-            "metadata": {
-                "description": "DSC configuration function to call. Should contain filename and function in format fileName.ps1\\configurationfunction"
-            }
-        },
         "registrationKey": {
             "type": "securestring",
             "metadata": {
