@@ -48,11 +48,12 @@
         xADDomainController ReplicaDC 
         { 
             DomainName = $dscDomainName 
-            DomainAdministratorCredential = $dscDomainAdmin 
+            DomainAdministratorCredential = $dscDomainJoinAdmin 
             SafemodeAdministratorPassword = $SafeModePassword 
             DatabasePath = "C:\NTDS"
             LogPath = "C:\NTDS"
             SysvolPath = "C:\SYSVOL"
+            SiteName = "AzureSite"
             DependsOn = "[xWaitForADDomain]DScForestWait"
         } 
         xPendingReboot Reboot1 
