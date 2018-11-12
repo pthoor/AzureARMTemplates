@@ -20,6 +20,12 @@
                 "description": "The password for the Intune admin username."
             }
         },
+        "Date": {
+            "type": "string",
+            "metadata": {
+                "description": "Date you want to start the schedule."
+            }
+        },
         "modules_AzureAD_name": {
             "defaultValue": "AzureAD",
             "type": "string"
@@ -40,7 +46,7 @@
         "IntuneAdminUsername": "[parameters('IntuneAdminUsername')]",
         "IntuneAdminPassword": "[parameters('IntuneAdminPassword')]",
         "runbookDescription": "Authenticates to Intune via Graph API and lists all managed devices, then emails the list",
-        "scriptUri": ""
+        "scriptUri": "https://raw.githubusercontent.com/pthoor/AzureARMTemplates/master/Intune%20Device%20Report%20with%20Azure%20Automation%20Account/IntuneDeviceReport.ps1"
     },
     "resources": [
       {
@@ -111,27 +117,44 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
             ]      
-           }
-        ]
-      },
-      {
-        "type": "Microsoft.Automation/automationAccounts/runbooks",
-        "name": "IntuneDeviceReport",
-        "apiVersion": "2015-10-31",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]"
-          ],
-        "properties": {
-            "runbookType": "Script",
-            "logProgress": "false",
-            "logVerbose": "false",
-            "description": "[variables('runbookDescription')]",
-            "publishContentLink": {
-                "uri": "[variables('scriptUri')]",
-                "version": "1.0.0.0"
+           },
+           {
+            "type": "Microsoft.Automation/automationAccounts/runbooks",
+            "name": "[concat(variables('accountName'), '/', 'IntuneDeviceReport')]",
+            "apiVersion": "2018-06-30",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Automation/automationAccounts/', variables('accountName'))]"
+              ],
+            "properties": {
+                "runbookType": "PowerShell",
+                "logVerbose": true,
+                "logProgress": true,
+                "logActivityTrace": 0,
+                "description": "[variables('runbookDescription')]",
+                "publishContentLink": {
+                    "uri": "[variables('scriptUri')]"
+                }
             }
-        }
+          },
+          {
+            "type": "Microsoft.Automation/automationAccounts/schedules",
+            "name": "[concat(variables('accountName'), '/', 'Schedule')]",
+            "apiVersion": "2015-10-31",
+            "scale": null,
+            "properties": {
+                "description": "",
+                "startTime": "[concat(parameters('Date'), 'T10:00:00+01:00')]",
+                "expiryTime": "2019-11-18T07:32:00+01:00",
+                "interval": 1,
+                "frequency": "Day",
+                "timeZone": "Europe/Stockholm"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
+            ]
+          }
+        ]
       }
     ],
     "outputs": {}
