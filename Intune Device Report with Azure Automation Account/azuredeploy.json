@@ -1,0 +1,138 @@
+{
+    "$schema": "http://schemas.microsoft.org/azure/deploymentTemplate?api-version=2015-01-01#",
+    "contentVersion": "1.0",
+    "parameters": {
+        "accountName": {
+            "type": "string",
+            "metadata" : {
+                "description": "Name of the Azure Automation Account"
+            }
+        },
+        "IntuneAdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "The Intune admin username."
+            }
+        },
+        "IntuneAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for the Intune admin username."
+            }
+        },
+        "modules_AzureAD_name": {
+            "defaultValue": "AzureAD",
+            "type": "string"
+        },
+        "modules_ImportExcel_name": {
+            "defaultValue": "ImportExcel",
+            "type": "string"
+        },
+        "modules_MSGraphIntuneManagement_name": {
+            "defaultValue": "MSGraphIntuneManagement",
+            "type": "string"
+        }
+    },
+    "variables": {
+        "sku": "Free",
+        "accountName": "[parameters('accountName')]",
+        "IntuneCedentialName": "IntuneCreds",
+        "IntuneAdminUsername": "[parameters('IntuneAdminUsername')]",
+        "IntuneAdminPassword": "[parameters('IntuneAdminPassword')]",
+        "runbookDescription": "Authenticates to Intune via Graph API and lists all managed devices, then emails the list",
+        "scriptUri": ""
+    },
+    "resources": [
+      {
+        "name": "[variables('accountName')]",
+        "type": "Microsoft.Automation/automationAccounts",
+        "apiVersion": "2015-10-31",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [ ],
+        "tags": { },
+        "properties": {
+          "sku": {
+            "name": "[variables('sku')]"
+          }
+        },
+        "resources": [
+          {
+            "name": "[variables('IntuneCedentialName')]",
+            "type": "credentials",
+            "apiVersion": "2015-10-31",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Automation/automationAccounts/', variables('accountName'))]"
+            ],
+            "tags": { },
+            "properties": {
+              "userName": "[variables('IntuneAdminUsername')]",
+              "password": "[variables('IntuneAdminPassword')]"
+            }
+          },
+          {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "name": "[concat(variables('accountName'), '/', parameters('modules_AzureAD_name'))]",
+            "apiVersion": "2015-10-31",
+            "scale": null,
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/azuread.2.0.2.4.nupkg"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
+            ]
+           },
+           {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "name": "[concat(variables('accountName'), '/', parameters('modules_ImportExcel_name'))]",
+            "apiVersion": "2015-10-31",
+            "scale": null,
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/importexcel.5.4.0.nupkg"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
+            ]      
+           },
+           {
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "name": "[concat(variables('accountName'), '/', parameters('modules_MSGraphIntuneManagement_name'))]",
+            "apiVersion": "2015-10-31",
+            "scale": null,
+            "properties": {
+                "contentLink": {
+                    "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/msgraphintunemanagement.0.2.0.nupkg"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', variables('accountName'))]"
+            ]      
+           }
+        ]
+      },
+      {
+        "type": "Microsoft.Automation/automationAccounts/runbooks",
+        "name": "IntuneDeviceReport",
+        "apiVersion": "2015-10-31",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]"
+          ],
+        "properties": {
+            "runbookType": "Script",
+            "logProgress": "false",
+            "logVerbose": "false",
+            "description": "[variables('runbookDescription')]",
+            "publishContentLink": {
+                "uri": "[variables('scriptUri')]",
+                "version": "1.0.0.0"
+            }
+        }
+      }
+    ],
+    "outputs": {}
+}
