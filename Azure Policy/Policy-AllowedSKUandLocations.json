@@ -1,0 +1,30 @@
+[
+  {
+      "comment": "Allowed regions",
+      "parameters": {
+          "regions": {
+              "value": [
+                "West Europe"
+              ]
+          }
+      },
+      "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c"
+  },
+  {
+      "comment": "Allowed VM SKUs. Non-compliant SKUs will be denied.",
+      "parameters": {
+          "listOfAllowedSKUs": {
+              "value": [
+                  "Standard_B1ms",
+                  "Standard_B1s",
+                  "Standard_B2ms",
+                  "Standard_B2s",
+                  "Standard_B4ms",
+                  "Standard_D2_v3",
+                  "Standard_D2s_v3"
+              ]
+          }
+      },
+      "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cccc23c7-8427-4f53-ad12-b6a63eb452b3"
+  }
+]
