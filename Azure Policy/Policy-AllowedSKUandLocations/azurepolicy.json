@@ -8,13 +8,6 @@
         "description": "Specifies the name of the policy assignment."
       }
     },
-    "rgName":{
-      "type": "string",
-      "defaultValue": "[resourceGroup().name]",
-      "metadata": {
-        "description": "Specifies the name of the resource group where you want to assign the policy."
-      }
-    },
     "policyDefinitionID": {
       "type": "string",
       "metadata": {
@@ -29,7 +22,7 @@
       "name": "[parameters('policyAssignmentName')]",
       "apiVersion": "2018-05-01",
       "properties": {
-        "scope": "[concat(subscription().id, '/resourceGroups/', parameters('rgName'))]",
+        "scope": "[concat(subscription().id)]",
         "policyDefinitionId": "[parameters('policyDefinitionID')]"
       }
     }
