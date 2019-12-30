@@ -1,56 +1,37 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "variables": {
-        "policySetName": "enforce-resource-tagging-psd",
-        "policySetDisplayName": "Enforce using mandatory tags for resource groups",
-        "policySetDescription": "This policy initiative enforces the usage of mandatory tags for resource groups.",
-        "policyDefinitionForResourceGroupTagging": "enforce-resource-group-tags-pd"
-
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "policyAssignmentName": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the name of the policy assignment."
+      }
     },
-    "resources": [
-        {
-            "type": "Microsoft.Authorization/policySetDefinitions",
-            "apiVersion": "2019-09-01",
-            "name": "[variables('policySetName')]",
-            "properties": {
-                "displayName": "[variables('policySetDisplayName')]",
-                "description": "[variables('policySetDescription')]",
-                "policyType": "Custom",
-                "metadata": {
-                    "category": "Tags"
-                },
-                "parameters": {
-                    "allowedEnvironmentTagValues": {
-                        "type": "array",
-                        "metadata": {
-                            "displayName": "Allowed 'environment' tag values",
-                            "description": "The list of allowed values for 'Environment' tag."
-                        }
-                    },
-                    "allowedCriticalityTagValues": {
-                        "type": "array",
-                        "metadata": {
-                            "displayName": "Allowed 'criticality' tag values",
-                            "description": "The list of allowed values for 'Criticality' tag."
-                        }
-                    }
-                },
-                "policyDefinitions": [
-                    {
-                        "policyDefinitionId": "[concat(subscription().id, '/providers/Microsoft.Authorization/policyDefinitions/', variables('policyDefinitionForResourceGroupTagging'))]",
-                        "policyDefinitionReferenceId": "Resource_Group_Tags",
-                        "parameters": {
-                            "allowedEnvironmentTagValues": {
-                                "value": "[[parameters('allowedEnvironmentTagValues')]"
-                            },
-                            "allowedCriticalityTagValues": {
-                                "value": "[[parameters('allowedCriticalityTagValues')]"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    ]
+    "rgName":{
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Specifies the name of the resource group where you want to assign the policy."
+      }
+    },
+    "policyDefinitionID": {
+      "type": "string",
+      "metadata": {
+        "description": "Specifies the ID of the policy definition or policy set definition being assigned."
+      },
+      "defaultValue": "/providers/Microsoft.Authorization/policyDefinitions/0a914e76-4921-4c19-b460-a2d36003525a"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/policyAssignments",
+      "name": "[parameters('policyAssignmentName')]",
+      "apiVersion": "2018-05-01",
+      "properties": {
+        "scope": "[concat(subscription().id, '/resourceGroups/', parameters('rgName'))]",
+        "policyDefinitionId": "[parameters('policyDefinitionID')]"
+      }
+    }
+  ]
 }
