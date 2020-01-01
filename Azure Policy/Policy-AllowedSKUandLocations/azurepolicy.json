@@ -1,7 +1,12 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {},
+    "parameters": {
+        "listOfAllowedSKUs": {
+            "type": "array",
+            "defaultValue": "B2_ms"
+        }
+    },
     "variables": {},
     "resources": [
         {
@@ -23,15 +28,36 @@
             }
         },
         {
+            "type": "Microsoft.Authorization/policySetDefinitions",
+            "name": "Allowed virtual machine SKUs",
+            "apiVersion": "2018-05-01",
+            "properties": {
+                "policyType": "BuiltIn",
+                "mode": "All",
+                "parameters": {},
+                "policyDefinitions": [
+                    {
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cccc23c7-8427-4f53-ad12-b6a63eb452b3",
+                        "parameters": {
+                            "listOfAllowedSKUs": {
+                            "value": "[parameters('listOfAllowedSKUs')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
             "type": "Microsoft.Authorization/policyAssignments",
-            "name": "location-lock",
+            "name": "location-and-VM-SKU-lock",
             "apiVersion": "2018-05-01",
             "dependsOn": [
-                "locationpolicy"
+                "locationpolicy",
+                "Allowed virtual machine SKUs"
             ],
             "properties": {
                 "scope": "[subscription().id]",
-                "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'locationpolicy')]"
+                "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'locationpolicy', resourceId('Microsoft.Authorization/policySetDefinitions', 'Allowed virtual machine SKUs'))]"
             }
         }
     ]
