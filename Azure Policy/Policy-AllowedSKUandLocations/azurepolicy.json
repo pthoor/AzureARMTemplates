@@ -33,7 +33,6 @@
             "apiVersion": "2018-05-01",
             "properties": {
                 "policyType": "BuiltIn",
-                "mode": "All",
                 "parameters": {},
                 "policyDefinitions": [
                     {
