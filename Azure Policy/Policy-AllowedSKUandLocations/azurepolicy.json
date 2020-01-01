@@ -3,8 +3,8 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "listOfAllowedSKUs": {
-            "type": "string",
-            "defaultValue": "B2_ms"
+            "type": "array",
+            "defaultValue": ["B2_ms"]
         }
     },
     "variables": {},
