@@ -1,0 +1,82 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "listOfAllowedSKUs": {
+            "type": "array",
+            "defaultValue": [
+                "Standard_B2ms"
+            ]
+        },
+        "listOfAllowedLocations": {
+            "type": "array",
+            "defaultValue": [
+                "West Europe"
+            ]
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "VM-SKU-and-location-policy",
+            "type": "Microsoft.Authorization/policySetDefinitions",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "displayName": "VM SKU and Location Policy",
+                "policyType": "Custom",
+                "description": "Allowed VM SKU and locations",
+                "parameters": {
+                    "listOfAllowedSKUs": {
+                        "type": "array",
+                        "defaultValue": [
+                            "Standard_B2ms"
+                        ]
+                    },
+                    "listOfAllowedLocations": {
+                        "type": "array",
+                        "defaultValue": [
+                            "West Europe"
+                        ]
+                    }
+                },
+                "policyDefinitions": [{
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cccc23c7-8427-4f53-ad12-b6a63eb452b3",
+                        "parameters": {
+                            "listOfAllowedSKUs": {
+                                "value": "[parameters('listOfAllowedSKUs')]"
+                            }
+                        }
+                    },
+                    {
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c",
+                        "parameters": {
+                            "listOfAllowedLocations": {
+                                "value": "[parameters('listOfAllowedLocations')]"
+                            }
+                        }
+                    },
+                    {
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e765b5de-1225-4ba3-bd56-1ac6695af988",
+                        "parameters": {
+                            "listOfAllowedLocations": {
+                                "value": "[parameters('listOfAllowedLocations')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "name": "VM SKU and Location Policy Assignment",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/policySetDefinitions', 'VM-SKU-and-location-policy')]"
+            ],
+            "properties": {
+                "scope": "[subscription().id]",
+                "policyDefinitionId": "[resourceId('Microsoft.Authorization/policySetDefinitions', 'VM-SKU-and-location-policy')]"
+            }
+        }
+    ]
+}
