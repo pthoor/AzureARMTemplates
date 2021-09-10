@@ -1,8 +1,6 @@
 {
   "VSTS":{
-    "Uri": "https://vstsagentpackage.azureedge.net/agent/2.140.0/vsts-agent-win-x64-2.140.0.zip",
-    "Hash": "7CAB582D6A05B1147B023423CA9EE43E320CE70BDE11615E8D60E92415FC438C",
-    "HashType": "SHA256",
+    "Uri": "https://vstsagentpackage.azureedge.net/agent/2.191.1/vsts-agent-win-x64-2.191.1.zip",
     "CmdLine": "config.cmd",
     "EnvironmentalVariables": [
       {
