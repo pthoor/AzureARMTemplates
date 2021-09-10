@@ -48,10 +48,8 @@
     "AddToPath": "C:\\Program Files (x86)\\IIS\\Microsoft Web Deploy V3\\"
   },
   "AZCli":{
-    "Uri": "https://azurecliprod.azureedge.net/msi/azure-cli-2.0.45.msi",
-    "Hash": "CDB3D37C0179311274F7ED9649E283921CC1A4CB2B7FA5409B483857E0263161",
-    "HashType": "SHA256",
-    "CmdLine": "azure-cli-2.0.45.msi",
+    "Uri": "https://aka.ms/installazurecliwindows",
+    "CmdLine": "AzureCLI.msi",
     "AddToPath": "C:\\Program Files (x86)\\Microsoft SDKs\\Azure\\CLI2\\wbin",
     "EnvironmentalVariables": [
       {
