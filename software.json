@@ -50,6 +50,7 @@
   "AZCli":{
     "Uri": "https://aka.ms/installazurecliwindows",
     "CmdLine": "AzureCLI.msi",
+    "Arguments": "/I AzureCLI.msi /quiet",
     "AddToPath": "C:\\Program Files (x86)\\Microsoft SDKs\\Azure\\CLI2\\wbin",
     "EnvironmentalVariables": [
       {
